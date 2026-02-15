@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Debugfast Demo | Team Fixforce</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: #0a0f1e;
+    color: #f0f4f8;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* ─── ANIMATED CIRCUIT GRID ─── */
+  .circuit-grid {
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0, 119, 255, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 119, 255, 0.04) 1px, transparent 1px);
+    background-size: 50px 50px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ─── FLOATING ORB GLOWS ─── */
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(100px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .orb-1 {
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(0, 119, 255, 0.15), transparent 70%);
+    top: -200px; right: -150px;
+    animation: orbFloat1 12s ease-in-out infinite;
+  }
+
+  .orb-2 {
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(0, 194, 255, 0.12), transparent 70%);
+    bottom: -150px; left: -100px;
+    animation: orbFloat2 15s ease-in-out infinite;
+  }
+
+  .orb-3 {
+    width: 350px; height: 350px;
+    background: radial-gradient(circle, rgba(108, 60, 233, 0.1), transparent 70%);
+    top: 40%; left: 50%;
+    transform: translate(-50%, -50%);
+    animation: orbFloat3 10s ease-in-out infinite;
+  }
+
+  @keyframes orbFloat1 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(-40px, 30px) scale(1.08); }
+  }
+  @keyframes orbFloat2 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(30px, -40px) scale(1.05); }
+  }
+  @keyframes orbFloat3 {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+    50% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
+  }
+
+  /* ─── ANIMATED PARTICLES ─── */
+  .particles {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .particle {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: rgba(0, 119, 255, 0.4);
+    border-radius: 50%;
+    animation: particleRise linear infinite;
+  }
+
+  @keyframes particleRise {
+    0% { transform: translateY(100vh) scale(0); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(-20vh) scale(1); opacity: 0; }
+  }
+
+  /* ─── SCAN LINE ─── */
+  .scanline {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(0, 194, 255, 0.3), transparent);
+    z-index: 1;
+    animation: scanDown 6s linear infinite;
+    pointer-events: none;
+  }
+
+  @keyframes scanDown {
+    0% { top: -2px; }
+    100% { top: 100vh; }
+  }
+
+  /* ─── CONTENT ─── */
+  .container {
+    position: relative;
+    z-index: 10;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 40px 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+  }
+
+  /* ─── TOP BAR WITH LOGOS ─── */
+  .top-bar {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(0, 119, 255, 0.1);
+    margin-bottom: 20px;
+  }
+
+  .debugfast-logo {
+    height: 54px;
+    opacity: 0.95;
+  }
+
+  .sf-logo {
+    height: 50px;
+    opacity: 0.9;
+    filter: brightness(1.1);
+  }
+
+  /* ─── TITLE SECTION ─── */
+  .title-section {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #00c2ff;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .tag .pulse {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #00c2ff;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 194, 255, 0.4); }
+    50% { opacity: 1; transform: scale(1.2); box-shadow: 0 0 12px 4px rgba(0, 194, 255, 0.2); }
+  }
+
+  .title-section h1 {
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+
+  .title-section h1 .gradient {
+    background: linear-gradient(135deg, #0077ff, #00c2ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .title-section p {
+    font-size: 16px;
+    color: #7a8da6;
+    font-weight: 300;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* ─── VIDEO CONTAINER ─── */
+  .video-wrapper {
+    width: 100%;
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #0d1322;
+    border: 1px solid rgba(0, 119, 255, 0.15);
+    box-shadow:
+      0 0 0 1px rgba(0, 119, 255, 0.05),
+      0 8px 40px rgba(0, 0, 0, 0.4),
+      0 0 80px rgba(0, 119, 255, 0.06);
+    margin-bottom: 20px;
+  }
+
+  .video-wrapper::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 17px;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(0, 119, 255, 0.3), transparent 40%, transparent 60%, rgba(0, 194, 255, 0.2));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .video-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: #111827;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  }
+
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot.r { background: #ff5f57; }
+  .dot.y { background: #febc2e; }
+  .dot.g { background: #28c840; }
+
+  .video-bar-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #4a5568;
+    margin-left: 12px;
+  }
+
+  .video-bar-badge {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: #00c2ff;
+    background: rgba(0, 194, 255, 0.08);
+    border: 1px solid rgba(0, 194, 255, 0.15);
+    border-radius: 12px;
+    padding: 3px 10px;
+    letter-spacing: 1px;
+  }
+
+  video {
+    width: 100%;
+    display: block;
+    background: #000;
+  }
+
+  /* ─── BOTTOM INFO ─── */
+  .bottom-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+
+  .info-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(0, 119, 255, 0.1);
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-size: 13px;
+    color: #7a8da6;
+  }
+
+  .info-chip .icon {
+    font-size: 16px;
+  }
+
+  .info-chip strong {
+    color: #f0f4f8;
+    font-weight: 600;
+  }
+
+  /* ─── FOOTER ─── */
+  .footer {
+    margin-top: 24px;
+    text-align: center;
+    padding-top: 16px;
+    border-top: 1px solid rgba(0, 119, 255, 0.08);
+    width: 100%;
+  }
+
+  .footer p {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #4a5568;
+    letter-spacing: 2px;
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 640px) {
+    .container { padding: 24px 16px 40px; }
+    .top-bar { flex-direction: column; gap: 16px; }
+    .debugfast-logo { height: 36px; }
+    .sf-logo { height: 32px; }
+    .bottom-info { flex-direction: column; gap: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Background effects -->
+<div class="circuit-grid"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+<div class="scanline"></div>
+<div class="particles" id="particles"></div>
+
+<div class="container">
+
+  <!-- Logo bar -->
+  <div class="top-bar">
+    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2MDAgMTYwIiB3aWR0aD0iNjAwIiBoZWlnaHQ9IjE2MCI+CiAgPGRlZnM+CiAgICA8IS0tIE1haW4gZ3JhZGllbnQgLS0+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImJyYW5kR3JhZCIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMwMDc3ZmYiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojMDBjMmZmIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogICAgCiAgICA8IS0tIEljb24gZ3JhZGllbnQgLS0+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9Imljb25HcmFkIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3R5bGU9InN0b3AtY29sb3I6IzAwNTJjYyIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjUwJSIgc3R5bGU9InN0b3AtY29sb3I6IzAwNzdmZiIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMwMGMyZmYiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CgogICAgPCEtLSBQdWxzZSBnbG93IC0tPgogICAgPGZpbHRlciBpZD0iZ2xvdyI+CiAgICAgIDxmZUdhdXNzaWFuQmx1ciBzdGREZXZpYXRpb249IjIiIHJlc3VsdD0iY29sb3JlZEJsdXIiLz4KICAgICAgPGZlTWVyZ2U+CiAgICAgICAgPGZlTWVyZ2VOb2RlIGluPSJjb2xvcmVkQmx1ciIvPgogICAgICAgIDxmZU1lcmdlTm9kZSBpbj0iU291cmNlR3JhcGhpYyIvPgogICAgICA8L2ZlTWVyZ2U+CiAgICA8L2ZpbHRlcj4KCiAgICA8IS0tIFN1YnRsZSBzaGFkb3cgLS0+CiAgICA8ZmlsdGVyIGlkPSJzaGFkb3ciIHg9Ii0xMCUiIHk9Ii0xMCUiIHdpZHRoPSIxMjAlIiBoZWlnaHQ9IjEyMCUiPgogICAgICA8ZmVEcm9wU2hhZG93IGR4PSIwIiBkeT0iMiIgc3RkRGV2aWF0aW9uPSI0IiBmbG9vZC1jb2xvcj0iIzAwNzdmZiIgZmxvb2Qtb3BhY2l0eT0iMC4xNSIvPgogICAgPC9maWx0ZXI+CiAgPC9kZWZzPgoKICA8IS0tID09PSBJQ09OOiBTaGllbGQgKyBCdWcgKyBMaWdodG5pbmcgPT09IC0tPgogIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIwLCA4KSIgZmlsdGVyPSJ1cmwoI3NoYWRvdykiPgogICAgPCEtLSBTaGllbGQgc2hhcGUgLS0+CiAgICA8cGF0aCBkPSJNNzIgOCBMMTMyIDI4IEwxMzIgNzYgQzEzMiAxMDggMTA0IDEzNCA3MiAxNDQgQzQwIDEzNCAxMiAxMDggMTIgNzYgTDEyIDI4IFoiIAogICAgICAgICAgZmlsbD0idXJsKCNpY29uR3JhZCkiIG9wYWNpdHk9IjAuMSIgc3Ryb2tlPSJ1cmwoI2ljb25HcmFkKSIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KICAgIAogICAgPCEtLSBJbm5lciBzaGllbGQgaGlnaGxpZ2h0IC0tPgogICAgPHBhdGggZD0iTTcyIDE4IEwxMjIgMzUgTDEyMiA3NiBDMTIyIDEwMiA5OCAxMjQgNzIgMTMzIEM0NiAxMjQgMjIgMTAyIDIyIDc2IEwyMiAzNSBaIiAKICAgICAgICAgIGZpbGw9Im5vbmUiIHN0cm9rZT0idXJsKCNicmFuZEdyYWQpIiBzdHJva2Utd2lkdGg9IjEiIG9wYWNpdHk9IjAuMyIvPgoKICAgIDwhLS0gQnVnIGljb24gKGNpcmNsZSBib2R5ICsgYW50ZW5uYWUpIC0tPgogICAgPGVsbGlwc2UgY3g9IjcyIiBjeT0iNzgiIHJ4PSIyMiIgcnk9IjI2IiBmaWxsPSJub25lIiBzdHJva2U9InVybCgjYnJhbmRHcmFkKSIgc3Ryb2tlLXdpZHRoPSIyLjUiIG9wYWNpdHk9IjAuNyIvPgogICAgPCEtLSBCdWcgc2VnbWVudHMgLS0+CiAgICA8bGluZSB4MT0iNTAiIHkxPSI3MiIgeDI9Ijk0IiB5Mj0iNzIiIHN0cm9rZT0idXJsKCNicmFuZEdyYWQpIiBzdHJva2Utd2lkdGg9IjEuNSIgb3BhY2l0eT0iMC41Ii8+CiAgICA8bGluZSB4MT0iNTAiIHkxPSI4NCIgeDI9Ijk0IiB5Mj0iODQiIHN0cm9rZT0idXJsKCNicmFuZEdyYWQpIiBzdHJva2Utd2lkdGg9IjEuNSIgb3BhY2l0eT0iMC41Ii8+CiAgICA8IS0tIEJ1ZyBsZWdzIGxlZnQgLS0+CiAgICA8bGluZSB4MT0iNTAiIHkxPSI2OCIgeDI9IjM4IiB5Mj0iNTgiIHN0cm9rZT0idXJsKCNicmFuZEdyYWQpIiBzdHJva2Utd2lkdGg9IjIiIG9wYWNpdHk9IjAuNSIvPgogICAgPGxpbmUgeDE9IjUwIiB5MT0iNzgiIHgyPSIzNiIgeTI9Ijc4IiBzdHJva2U9InVybCgjYnJhbmRHcmFkKSIgc3Ryb2tlLXdpZHRoPSIyIiBvcGFjaXR5PSIwLjUiLz4KICAgIDxsaW5lIHgxPSI1MCIgeTE9Ijg4IiB4Mj0iMzgiIHkyPSI5OCIgc3Ryb2tlPSJ1cmwoI2JyYW5kR3JhZCkiIHN0cm9rZS13aWR0aD0iMiIgb3BhY2l0eT0iMC41Ii8+CiAgICA8IS0tIEJ1ZyBsZWdzIHJpZ2h0IC0tPgogICAgPGxpbmUgeDE9Ijk0IiB5MT0iNjgiIHgyPSIxMDYiIHkyPSI1OCIgc3Ryb2tlPSJ1cmwoI2JyYW5kR3JhZCkiIHN0cm9rZS13aWR0aD0iMiIgb3BhY2l0eT0iMC41Ii8+CiAgICA8bGluZSB4MT0iOTQiIHkxPSI3OCIgeDI9IjEwOCIgeTI9Ijc4IiBzdHJva2U9InVybCgjYnJhbmRHcmFkKSIgc3Ryb2tlLXdpZHRoPSIyIiBvcGFjaXR5PSIwLjUiLz4KICAgIDxsaW5lIHgxPSI5NCIgeTE9Ijg4IiB4Mj0iMTA2IiB5Mj0iOTgiIHN0cm9rZT0idXJsKCNicmFuZEdyYWQpIiBzdHJva2Utd2lkdGg9IjIiIG9wYWNpdHk9IjAuNSIvPgogICAgPCEtLSBBbnRlbm5hZSAtLT4KICAgIDxwYXRoIGQ9Ik02MiA1NCBRNTggMzggNDggMzIiIGZpbGw9Im5vbmUiIHN0cm9rZT0idXJsKCNicmFuZEdyYWQpIiBzdHJva2Utd2lkdGg9IjIiIG9wYWNpdHk9IjAuNiIvPgogICAgPGNpcmNsZSBjeD0iNDciIGN5PSIzMSIgcj0iMyIgZmlsbD0idXJsKCNicmFuZEdyYWQpIiBvcGFjaXR5PSIwLjYiLz4KICAgIDxwYXRoIGQ9Ik04MiA1NCBRODYgMzggOTYgMzIiIGZpbGw9Im5vbmUiIHN0cm9rZT0idXJsKCNicmFuZEdyYWQpIiBzdHJva2Utd2lkdGg9IjIiIG9wYWNpdHk9IjAuNiIvPgogICAgPGNpcmNsZSBjeD0iOTciIGN5PSIzMSIgcj0iMyIgZmlsbD0idXJsKCNicmFuZEdyYWQpIiBvcGFjaXR5PSIwLjYiLz4KICAgIAogICAgPCEtLSBMaWdodG5pbmcgYm9sdCAoZmFzdCEpIG92ZXJsYWlkIG9uIGJ1ZyAtLT4KICAgIDxwYXRoIGQ9Ik03OCA1OCBMNjggNzggTDc2IDc4IEw2NiAxMDAgTDg2IDcyIEw3OCA3MiBaIiAKICAgICAgICAgIGZpbGw9InVybCgjYnJhbmRHcmFkKSIgZmlsdGVyPSJ1cmwoI2dsb3cpIiBvcGFjaXR5PSIwLjk1Ii8+CiAgPC9nPgoKICA8IS0tID09PSBXT1JETUFSSyA9PT0gLS0+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTcwLCAwKSI+CiAgICA8IS0tICJEZWJ1Z2Zhc3QiIGFzIG9uZSB3b3JkIC0gIkRlYnVnIiBpbiBkYXJrLCAiZmFzdCIgaW4gZ3JhZGllbnQgLS0+CiAgICA8dGV4dCB4PSIwIiB5PSIxMDIiIGZvbnQtZmFtaWx5PSInU2Vnb2UgVUknLCAnSGVsdmV0aWNhIE5ldWUnLCBBcmlhbCwgc2Fucy1zZXJpZiIgCiAgICAgICAgICBmb250LXNpemU9IjcyIiBmb250LXdlaWdodD0iODAwIiBsZXR0ZXItc3BhY2luZz0iLTMiIGZpbGw9IiNlOGVkZjQiPkRlYnVnPHRzcGFuIGZpbGw9InVybCgjYnJhbmRHcmFkKSI+ZmFzdDwvdHNwYW4+PC90ZXh0PgogIDwvZz4KCiAgPCEtLSA9PT0gVEFHTElORSA9PT0gLS0+CiAgPHRleHQgeD0iMTcyIiB5PSIxMzAiIGZvbnQtZmFtaWx5PSInQ29uc29sYXMnLCAnQ291cmllciBOZXcnLCBtb25vc3BhY2UiIAogICAgICAgIGZvbnQtc2l6ZT0iMTQiIGxldHRlci1zcGFjaW5nPSIzIiBmaWxsPSIjNWE3YTllIiBvcGFjaXR5PSIwLjciPgogICAgQUktUE9XRVJFRCBTQUxFU0ZPUkNFIExPRyBBTkFMWVNJUzwvdGV4dD4KCiAgPCEtLSBBY2NlbnQgZG90IC0tPgogIDxjaXJjbGUgY3g9IjE3MCIgY3k9IjEyNiIgcj0iMyIgZmlsbD0idXJsKCNicmFuZEdyYWQpIiBvcGFjaXR5PSIwLjUiLz4KPC9zdmc+" alt="Debugfast" class="debugfast-logo" />
+    <img src="salesforce.jpeg" alt="Salesforce" class="sf-logo" />
+  </div>
+
+  <!-- Title -->
+  <div class="title-section">
+    <div class="tag"><span class="pulse"></span> MVP PROTOTYPE DEMO</div>
+    <h1><span class="gradient">Debugfast</span> in Action</h1>
+    <p>Watch how AI-powered log analysis transforms Salesforce debugging from minutes of manual scanning to seconds of automated insight.</p>
+  </div>
+
+  <!-- Video Player -->
+  <div class="video-wrapper">
+    <div class="video-bar">
+      <div class="dot r"></div>
+      <div class="dot y"></div>
+      <div class="dot g"></div>
+      <span class="video-bar-title">Debugfast-Demo</span>
+      <span class="video-bar-badge">Team Fixforce</span>
+    </div>
+    <video controls preload="metadata" poster="">
+      <source src="https://drive.google.com/file/d/1s79iTZppvO3ERWNIArdyDpWUQlTeFjZM/view?usp=sharing" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+  </div>
+
+  <!-- Info chips -->
+  <div class="bottom-info">
+    <div class="info-chip">
+      <span class="icon">👥</span>
+      <span><strong>Team Fixforce</strong></span>
+    </div>
+    <div class="info-chip">
+      <span class="icon">⚡</span>
+      <span>Real-time AI Analysis</span>
+    </div>
+    <div class="info-chip">
+      <span class="icon">🔄</span>
+      <span>Multi-Org Support</span>
+    </div>
+    <div class="info-chip">
+      <span class="icon">🛡️</span>
+      <span>Zero Config Setup</span>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p>DEBUGFAST BY TEAM FIXFORCE  ·  HACKATHON 2025</p>
+  </div>
+
+</div>
+
+<script>
+  // Generate floating particles
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 30; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDuration = (8 + Math.random() * 12) + 's';
+    p.style.animationDelay = Math.random() * 10 + 's';
+    p.style.width = p.style.height = (2 + Math.random() * 3) + 'px';
+    p.style.opacity = (0.2 + Math.random() * 0.4);
+    container.appendChild(p);
+  }
+</script>
+
+</body>
+</html>
